@@ -182,8 +182,9 @@ for m in M:
                 if e and len(eras) > 1:
                     path.append("年代放宽到" + ("不限" if len(eras) == 6 else "、".join(E[x] for x in sorted(eras))))
                 if len(res) < 8: gs = set(G); res = hit(m, eras, gs, rs); path.append("题材放宽到不限")
-                if len(res) < 8: rs = set(Dn); res = hit(m, eras, gs, rs); path.append("地区放宽到不限")
+                # 地区不放宽：规则里道具来源不离开这个地区，开局和 Tips 也是最后才放宽地区，作品库不替 DM 跳到别的地区
                 head = f"作品库：{M[m]}｜{Dn[r]}｜{E[e]}｜{G[g]}；这一格共 {len(res)} 部" + ("；" + "，".join(path) if path else "")
+                if len(res) < 8: head += "；作品库里这个地区的作品不够，照规则在这一格里自己补" if res else "；作品库里这个地区没有这一类作品，照规则在这一格里自己列"
                 res = sorted(res, key=lambda i: -rows3[i][6])[:CAP]
                 idx = []
                 for i in res:
