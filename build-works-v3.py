@@ -155,6 +155,7 @@ M = {1: "动画与漫画", 2: "游戏", 3: "小说", 4: "电影与剧集", 5: "�
 Dn = {1: "中国（含港澳台）", 2: "日本", 3: "韩国", 4: "欧洲", 5: "北美", 6: "其他地区"}
 E = {0: "不限", 1: "1980 年前", 2: "1980–1994", 3: "1995–2004", 4: "2005–2012", 5: "2013–2018", 6: "2019 年后"}
 G = {1: "奇幻", 2: "科幻", 3: "东方幻想", 4: "冒险", 5: "末世与废土", 6: "神话志怪", 7: "历史", 8: "其他"}
+GN = {0: "不限", **G}  # 题材填 0：不限题材，放宽题材时用
 # 统一成 [编号, 显示名, 年份, 媒介, 地区, 题材, 权重]
 rows3 = []
 for w in works:
@@ -174,16 +175,16 @@ def hit(m, eras, gs, rs):
 for m in M:
     for r in Dn:
         for e in (range(7) if m <= 4 else [0]):
-            for g in G:
-                eras = {e} if e else set(); gs, rs, path = {g}, {r}, []
+            for g in GN:
+                eras = {e} if e else set(); gs, rs, path = ({g} if g else set(G)), {r}, []
                 res = hit(m, eras, gs, rs); k = 1
                 while e and len(res) < 8 and len(eras) < 6:
                     eras = {x for x in range(e - k, e + k + 1) if 1 <= x <= 6}; res = hit(m, eras, gs, rs); k += 1
                 if e and len(eras) > 1:
                     path.append("年代放宽到" + ("不限" if len(eras) == 6 else "、".join(E[x] for x in sorted(eras))))
-                if len(res) < 8: gs = set(G); res = hit(m, eras, gs, rs); path.append("题材放宽到不限")
+                if len(res) < 8 and g: gs = set(G); res = hit(m, eras, gs, rs); path.append("题材放宽到不限")
                 # 地区不放宽：规则里道具来源不离开这个地区，开局和 Tips 也是最后才放宽地区，作品库不替 DM 跳到别的地区
-                head = f"作品库：{M[m]}｜{Dn[r]}｜{E[e]}｜{G[g]}；这一格共 {len(res)} 部" + ("；" + "，".join(path) if path else "")
+                head = f"作品库：{M[m]}｜{Dn[r]}｜{E[e]}｜{GN[g]}；这一格共 {len(res)} 部" + ("；" + "，".join(path) if path else "")
                 if len(res) < 8: head += "；作品库里这个地区的作品不够，照规则在这一格里自己补" if res else "；作品库里这个地区没有这一类作品，照规则在这一格里自己列"
                 res = sorted(res, key=lambda i: -rows3[i][6])[:CAP]
                 idx = []
